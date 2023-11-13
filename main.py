@@ -3,7 +3,7 @@ import sys
 import time
 
 import mysql.connector
-from locust import HttpUser, task, User, constant, events
+from locust import task, User, constant, events
 
 
 connection = mysql.connector.connect(
@@ -14,20 +14,6 @@ connection = mysql.connector.connect(
 )
 
 
-# class HelloWorldUser(HttpUser):
-#
-#     def on_start(self):
-#         pass
-#
-#     def wait_time(self):
-#         return 1
-#
-#     @task
-#     def hello_world(self):
-#         self.client.get('/hello')
-#         self.client.get('/world')
-#
-
 class EchoUser(User):
     wait_time = constant(0.8)
 
@@ -37,7 +23,7 @@ class EchoUser(User):
             self._sqls = [(row[3], row[4]) for row in reader]
 
     @task
-    def echo(self):
+    def execute_sql(self):
         cursor = connection.cursor(buffered=True)
         sql: tuple[str, str] = self._sqls.pop(0)
         start = time.time()
