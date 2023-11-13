@@ -3,8 +3,10 @@ import csv
 import hashlib
 import re
 
+from re import Pattern
 
-reg = r'\A(?P<time>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+[A-Z]+)\s+(?P<id>\d+)\s+(?P<command>\w+)\b(?P<argument>.*)'
+REG = r'\A(?P<time>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+[A-Z]+)\s+(?P<id>\d+)\s+(?P<command>\w+)\b(?P<argument>.*)'
+pattern: Pattern = re.compile(REG)
 
 
 def parse_general_log(file_name: str):
@@ -14,7 +16,7 @@ def parse_general_log(file_name: str):
         writer = csv.writer(f)
 
         for log in logs:
-            m = re.match(reg, log)
+            m = pattern.match(log)
             if m:
                 time = m.group('time')
                 id = m.group('id')
@@ -42,7 +44,7 @@ def normalize_sql(lines: list[str], cursor: int) -> tuple[str, int]:
         return line, cursor + 1
 
     next_line = lines[cursor + 1]
-    if not next_line.startswith(' '):
+    if pattern.match(next_line):
         return line, cursor + 1
 
     new_line, cursor = normalize_sql(lines, cursor + 1)
@@ -50,5 +52,5 @@ def normalize_sql(lines: list[str], cursor: int) -> tuple[str, int]:
 
 
 if __name__ == '__main__':
-    file_name = 'general_log.log'
+    file_name = 'general_log2.log'
     parse_general_log(file_name)
