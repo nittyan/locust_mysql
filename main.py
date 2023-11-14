@@ -15,7 +15,10 @@ connection = mysql.connector.connect(
 
 
 class EchoUser(User):
-    wait_time = constant(0.8)
+    # wait_time = constant(0.8)
+
+    def wait_time(self):
+        return 0.8
 
     def on_start(self):
         with open('parsed_general_log2.log') as f:
@@ -39,7 +42,7 @@ class EchoUser(User):
         events.request.fire(
             request_type='sql',
             name=sql[1],
-            response_time=int(end - start) * 1000,
+            response_time=float(end - start) * 1000,
             response_length=sys.getsizeof(result),
             # exception=
         )
