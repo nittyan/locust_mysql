@@ -1,5 +1,6 @@
 import csv
 import dataclasses
+import datetime
 import sys
 import time
 
@@ -22,15 +23,19 @@ class Log:
     hash: str
 
 
-class EchoUser(User):
+class DBClient(User):
 
     def wait_time(self):
-        return 0.8
+        return self._wait_times.pop(0)
 
     def on_start(self):
         with open('parsed_general_log2.log') as f:
             reader = csv.reader(f)
             self._logs: list[Log] = [Log(time=row[0], sql=row[3], hash=row[4]) for row in reader]
+            self._wait_times: list[float] = []
+            for index in range(len(self._logs) - 1):
+                delta = datetime.datetime.fromisoformat(self._logs[index + 1].time) - datetime.datetime.fromisoformat(self._logs[index].time)
+                self._wait_times.append(delta.total_seconds())
 
     @task
     def execute_sql(self):
