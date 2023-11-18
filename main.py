@@ -29,7 +29,7 @@ class DBClient(User):
         return self._wait_times.pop(0)
 
     def on_start(self):
-        with open('parsed_general_log2.log') as f:
+        with open('normalized_general_log2.log') as f:
             reader = csv.reader(f)
             self._logs: list[Log] = [Log(time=row[0], sql=row[3], hash=row[4]) for row in reader]
             self._wait_times: list[float] = []

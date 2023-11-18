@@ -12,7 +12,7 @@ pattern: Pattern = re.compile(REG)
 def parse_general_log(file_name: str):
     logs = normalize_general_log(file_name)
 
-    with open(f'parsed_{file_name}', 'w', newline='') as f:
+    with open(f'normalized_{file_name}', 'w', newline='') as f:
         writer = csv.writer(f)
 
         for log in logs:
