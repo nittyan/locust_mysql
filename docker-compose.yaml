@@ -2,6 +2,8 @@ version: '3'
 
 services:
   mysql-locust:
+    container_name: mysql
+    hostname: mysql
     image: mysql:8.2.0
     environment:
       MYSQL_ROOT_PASSWORD: mysql
@@ -17,3 +19,16 @@ services:
     ports:
       - "3306:3306"
 
+  locust-main:
+    hostname: locust-main
+    build:
+      dockerfile: docker/locust-main
+    ports:
+      - "8088:8089"
+
+  locust-replica:
+    hostname: locust-replica
+    build:
+      dockerfile: docker/locust-replica
+    ports:
+      - "8087:8089"

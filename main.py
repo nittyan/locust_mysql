@@ -5,13 +5,14 @@ import sys
 import time
 
 import mysql.connector
-from locust import task, User, constant, events
+from locust import task, User, events
 
+import conf
 
 connection = mysql.connector.connect(
     user='user',
     password='password',
-    host='localhost',
+    host=conf.host,
     database='sample'
 )
 
@@ -29,7 +30,7 @@ class DBClient(User):
         return self._wait_times.pop(0)
 
     def on_start(self):
-        with open('normalized_general_log2.log') as f:
+        with open('normalized_general.log') as f:
             reader = csv.reader(f)
             self._logs: list[Log] = [Log(time=row[0], sql=row[3], hash=row[4]) for row in reader]
             self._wait_times: list[float] = []

@@ -1,0 +1,11 @@
+FROM python:3.11-slim
+
+COPY ../main.py ~/main.py
+COPY ../conf-distribute.py ~/conf.py
+COPY ../normalized_general.log ~/normalized_general.log
+COPY ../requirements.txt ~/requirements.txt
+
+WORKDIR ~/
+RUN pip install -r requirements.txt
+
+CMD ["locust", "-f", "main.py", "--master"]
