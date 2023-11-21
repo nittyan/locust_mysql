@@ -52,5 +52,5 @@ def normalize_sql(lines: list[str], cursor: int) -> tuple[str, int]:
 
 
 if __name__ == '__main__':
-    file_name = 'general_log2.log'
+    file_name = 'general.log'
     parse_general_log(file_name)
