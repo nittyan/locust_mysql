@@ -6,15 +6,18 @@ import time
 
 import mysql.connector
 from locust import task, User, events
+from sqlalchemy.pool import QueuePool
 
 import conf
 
-connection = mysql.connector.connect(
-    user='user',
-    password='password',
-    host=conf.host,
-    database='sample'
-)
+
+def get_connection():
+    return mysql.connector.connect(
+        user='user',
+        password='password',
+        host=conf.host,
+        database='sample'
+    )
 
 
 @dataclasses.dataclass
@@ -30,6 +33,8 @@ class DBClient(User):
         return self._wait_times.pop(0)
 
     def on_start(self):
+        self._queue_pool = QueuePool(get_connection, pool_size=10)
+
         with open('normalized_general.log') as f:
             reader = csv.reader(f)
             self._logs: list[Log] = [Log(time=row[0], sql=row[3], hash=row[4]) for row in reader]
@@ -40,13 +45,13 @@ class DBClient(User):
 
     @task
     def execute_sql(self):
+        connection = self._queue_pool.connect()
         cursor = connection.cursor(buffered=True)
         log: Log = self._logs.pop(0)
         start = time.time()
         cursor.execute(log.sql)
         end = time.time()
 
-        connection.commit()
         result = 0
         if cursor.rowcount:
             if not log.sql.lower().find('insert') > 0:
