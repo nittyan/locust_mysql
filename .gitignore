@@ -2,3 +2,5 @@ mysql
 venv
 __pycache__
 .idea
+
+*.log
