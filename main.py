@@ -27,27 +27,45 @@ class Log:
     hash: str
 
 
+class LazyLogReader:
+
+    def __init__(self, path: str):
+        self._path = path
+
+    def read_log(self) -> Log:
+        with open(self._path, 'r') as f:
+            reader = csv.reader(f)
+            for line in reader:
+                yield Log(time=line[0], sql=line[3], hash=line[4])
+
+
 class DBClient(User):
 
     def wait_time(self):
-        return self._wait_times.pop(0)
+        if len(self._logs) > 1:
+            return (datetime.datetime.fromisoformat(self._logs[1].time) - datetime.datetime.fromisoformat(self._logs[0].time)).total_seconds()
+        return 0
 
     def on_start(self):
         self._queue_pool = QueuePool(get_connection, pool_size=10)
-
-        with open('normalized_general.log') as f:
-            reader = csv.reader(f)
-            self._logs: list[Log] = [Log(time=row[0], sql=row[3], hash=row[4]) for row in reader]
-            self._wait_times: list[float] = []
-            for index in range(len(self._logs) - 1):
-                delta = datetime.datetime.fromisoformat(self._logs[index + 1].time) - datetime.datetime.fromisoformat(self._logs[index].time)
-                self._wait_times.append(delta.total_seconds())
+        reader = LazyLogReader('normalized_general.log')
+        self._log_gen = reader.read_log()
+        # 最初の3行分だけ先に読み込む
+        self._logs: list[Log] = [next(self._log_gen), next(self._log_gen), next(self._log_gen)]
 
     @task
     def execute_sql(self):
         connection = self._queue_pool.connect()
         cursor = connection.cursor(buffered=True)
         log: Log = self._logs.pop(0)
+        try:
+            next_log = next(self._log_gen)
+            if next_log:
+                self._logs.append(next_log)
+        except StopIteration:
+            # generator が値を返さない場合は処理を無視
+            pass
+
         start = time.time()
         cursor.execute(log.sql)
         end = time.time()
