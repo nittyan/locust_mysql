@@ -18,6 +18,8 @@ parse_general_log.py の file_name を適宜変えて
 python parse_general_log.py
 ```
 ## クエリーの実行
+conf.py へDBアクセスの設定を変更
+
 main.py の一般クエリーログのログファイル名を書き換え
 
 ### シングルで実行

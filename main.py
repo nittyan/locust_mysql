@@ -13,10 +13,10 @@ import conf
 
 def get_connection():
     return mysql.connector.connect(
-        user='user',
-        password='password',
+        user=conf.user,
+        password=conf.password,
         host=conf.host,
-        database='sample'
+        database=conf.database
     )
 
 
