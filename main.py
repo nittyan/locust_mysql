@@ -16,7 +16,8 @@ def get_connection():
         user=conf.user,
         password=conf.password,
         host=conf.host,
-        database=conf.database
+        database=conf.database,
+        port=conf.port
     )
 
 
