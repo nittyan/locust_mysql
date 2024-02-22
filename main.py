@@ -68,21 +68,31 @@ class DBClient(User):
             pass
 
         start = time.time()
-        cursor.execute(log.sql)
-        end = time.time()
+        try:
+            cursor.execute(log.sql)
 
-        result = 0
-        if cursor.rowcount:
-            if not log.sql.lower().find('insert') > 0:
-                result = cursor.fetchall()
+            result = 0
+            if cursor.rowcount:
+                if not log.sql.lower().find('insert') > 0:
+                    result = cursor.fetchall()
 
-        events.request.fire(
-            request_type='sql',
-            name=log.hash,
-            response_time=float(end - start) * 1000,
-            response_length=sys.getsizeof(result),
-            # exception=
-        )
-        cursor.close()
+            events.request.fire(
+                request_type='sql',
+                name=log.hash,
+                response_time=float(time.time() - start) * 1000,
+                response_length=sys.getsizeof(result),
+            )
+        except Exception as e:
+            events.request.fire(
+                request_type='sql',
+                name=log.hash,
+                response_time=float(time.time() - start) * 1000,
+                response_length=0,
+                excption=e
+            )
+
+        finally:
+            cursor.close()
+
         if not self._logs:
             self.stop()
