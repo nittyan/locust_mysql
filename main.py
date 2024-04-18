@@ -88,7 +88,7 @@ class DBClient(User):
                 name=log.hash,
                 response_time=float(time.time() - start) * 1000,
                 response_length=0,
-                excption=e
+                exception=e
             )
 
         finally:
